@@ -1,0 +1,38 @@
+{
+  "name": "ckpt",
+  "version": "0.1.0",
+  "description": "Automatic checkpoints for AI coding sessions. Per-step undo, branching, and restore — on top of git.",
+  "type": "module",
+  "bin": {
+    "ckpt": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "git", "ai", "checkpoint", "undo", "version-control",
+    "cursor", "kiro", "claude", "copilot", "coding-agent",
+    "snapshot", "restore", "diff", "developer-tools"
+  ],
+  "author": "mohshomis",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mohshomis/ckpt"
+  },
+  "homepage": "https://github.com/mohshomis/ckpt#readme",
+  "dependencies": {
+    "chokidar": "^3.6.0",
+    "commander": "^12.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "@types/node": "^20.0.0"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ]
+}
