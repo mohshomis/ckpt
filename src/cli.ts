@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import path from 'path';
+import { spawn } from 'child_process';
+import fs from 'fs';
 import * as core from './core.js';
 import { startWatch } from './watch.js';
 
@@ -9,7 +11,7 @@ const program = new Command();
 program
   .name('ckpt')
   .description('Automatic checkpoints for AI coding sessions. Per-step undo on top of git.')
-  .version('0.1.0')
+  .version('0.1.1')
   .option('-C, --path <dir>', 'Run as if ckpt was started in <dir>');
 
 function getCwd(): string {
@@ -20,10 +22,65 @@ function getCwd(): string {
 // ── watch ─────────────────────────────────────────────────────────────────
 program
   .command('watch')
-  .description('Auto-snapshot file changes — just run this and let the AI work')
+  .description('Auto-snapshot file changes in the background — returns control immediately')
   .option('-d, --debounce <ms>', 'Quiet period before snapshotting (ms)', '2000')
+  .option('--foreground', 'Run in foreground instead of background (blocks terminal)')
   .action((opts) => {
-    startWatch(getCwd(), parseInt(opts.debounce));
+    if (opts.foreground) {
+      startWatch(getCwd(), parseInt(opts.debounce));
+      return;
+    }
+
+    // Spawn as a detached background process
+    const cwd = getCwd();
+    const ckptBin = process.argv[1];
+    const args = ['watch', '--foreground', '-d', opts.debounce, '-C', cwd];
+    const logFile = path.join(cwd, '.ckpt', 'watch.log');
+
+    fs.mkdirSync(path.join(cwd, '.ckpt'), { recursive: true });
+    const out = fs.openSync(logFile, 'a');
+
+    const child = spawn(process.execPath, [ckptBin, ...args], {
+      detached: true,
+      stdio: ['ignore', out, out],
+      cwd,
+    });
+
+    // Save PID so we can stop it later
+    fs.writeFileSync(path.join(cwd, '.ckpt', 'watch.pid'), String(child.pid), 'utf8');
+    child.unref();
+
+    // Start session if not already active
+    let session = core.status(cwd);
+    if (!session) {
+      session = core.startSession(cwd);
+    }
+
+    console.log(`⚡ ckpt watching in background (pid ${child.pid})`);
+    console.log(`   Session: ${session.id}`);
+    console.log(`   Log: ${logFile}`);
+    console.log(`   Run "ckpt stop" to stop watching.\n`);
+  });
+
+// ── stop ──────────────────────────────────────────────────────────────────
+program
+  .command('stop')
+  .description('Stop the background watcher')
+  .action(() => {
+    const cwd = getCwd();
+    const pidFile = path.join(cwd, '.ckpt', 'watch.pid');
+    if (!fs.existsSync(pidFile)) {
+      console.log('No watcher running.');
+      return;
+    }
+    const pid = parseInt(fs.readFileSync(pidFile, 'utf8'));
+    try {
+      process.kill(pid, 'SIGTERM');
+      console.log(`⏹  Watcher stopped (pid ${pid}).`);
+    } catch {
+      console.log('Watcher was not running.');
+    }
+    fs.unlinkSync(pidFile);
   });
 
 // ── start ─────────────────────────────────────────────────────────────────
