@@ -123,6 +123,11 @@ export function startSession(cwd: string): Session {
     throw new Error(`Session already active (${existing.id}). Run "ckpt end" or "ckpt end --discard" first.`);
   }
 
+  // If repo has no commits yet, create an initial one
+  if (!gitSafe('rev-parse HEAD', cwd)) {
+    git('commit --allow-empty -m "initial commit"', cwd);
+  }
+
   const status = git('status --porcelain', cwd);
   if (status) {
     git('stash push -m "ckpt: auto-stash before session"', cwd);
