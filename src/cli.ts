@@ -109,7 +109,13 @@ program
         console.log(`\n✓ Step ${snapshot.id}: ${snapshot.message}`);
         console.log(`  ${snapshot.hash} | ${snapshot.filesChanged.length} files | +${snapshot.additions} -${snapshot.deletions}\n`);
       } else {
-        console.log('Nothing to snapshot — no changes.');
+        // Check if watch is running
+        const pidFile = path.join(getCwd(), '.ckpt', 'watch.pid');
+        if (fs.existsSync(pidFile)) {
+          console.log('Nothing new to snapshot — ckpt watch already captured these changes.');
+        } else {
+          console.log('Nothing to snapshot — no changes detected.');
+        }
       }
     } catch (e: any) {
       console.error(`✗ ${e.message}`);

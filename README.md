@@ -115,6 +115,16 @@ This is how good developers work. ckpt gives AI agents the same workflow.
 
 When an agent manually reverts by rewriting, it fills the context window with "oops, let me fix that" back-and-forth. With ckpt, a failed approach is `ckpt restore 3` — one line instead of 20 messages of debugging. The context stays clean for actual work.
 
+## Beyond coding — any AI that produces files at scale
+
+ckpt isn't just for coding agents. Any AI system that generates, edits, or manages files can use it — content pipelines, design tools, data processing, infrastructure-as-code generators, documentation bots.
+
+The pattern is the same everywhere: AI generates output at scale → something goes wrong halfway through → you either lose everything or manually figure out where it broke.
+
+The bigger the output, the worse the problem. An AI that edits 50 files in a batch has 50 chances to break something. Without checkpoints, one bad edit means re-running the entire batch. With ckpt, you restore to the last good state and only redo what failed.
+
+This is infrastructure. Any company running AI agents in production — whether they're writing code, generating reports, or managing configs — needs a way to checkpoint, inspect, and roll back AI work. ckpt is that layer.
+
 ## Works with any AI agent
 
 | Agent | Works? | How |
