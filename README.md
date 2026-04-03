@@ -137,7 +137,7 @@ It's just git under the hood — hidden branch, real commits, squash when done.
 ## Install
 
 ```bash
-npm install -g ckpt
+npm install -g @mohshomis/ckpt
 ```
 
 ## Usage

@@ -1,5 +1,5 @@
 {
-  "name": "ckpt",
+  "name": "@mohshomis/ckpt",
   "version": "0.1.0",
   "description": "Automatic checkpoints for AI coding sessions. Per-step undo, branching, and restore — on top of git.",
   "type": "module",
